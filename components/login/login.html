@@ -1,0 +1,30 @@
+﻿<ion-view hide-nav-bar="true">
+    <!-- style="background: url(img/login.jpg) center; background-size: cover;" -->
+    <ion-content>
+        <div class="hero no-header flat">
+            <div class="content">
+                <div class="app-icon"></div>
+
+            </div>
+        </div>
+        <div class="list">
+            <form name="vm.loginform" ng-submit="vm.submitLogin(user)" novalidate>
+                <ion-md-input placeholder="Username / Email" highlight-color="balanced" type="text" ng-model="user.username" name="username" ng-minlength="2" required></ion-md-input>
+                <ion-md-input placeholder="Password" highlight-color="energized" type="Password" ng-model="user.password" name="password" ng-minlength="2" required></ion-md-input>
+            </form>
+        </div>
+        <div class="padding">
+            <button class="button button-block button-assertive" ng-click="vm.submitLogin(user)">
+                Login
+            </button>
+        </div>
+
+        <div class="button-bar social-login">
+            <button class="button button-block button-border icon-left">Register</button>
+            <!--
+             <button class="button button-small button-border icon-left ion-social-twitter button-calm-900">Twitter</button>
+             <button class="button button-small button-border icon-left ion-social-facebook button-positive-900">Facebook</button>
+            -->
+        </div>
+    </ion-content>
+</ion-view>  

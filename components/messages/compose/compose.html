@@ -1,0 +1,28 @@
+﻿<ion-view view-title="New Message" hide-tabs>
+    <ion-content class="padding">
+        <div id="thread stuff" class="msg-container-base">
+            <div class="recipients">
+                <div><span>To:</span></div>
+                <div>
+                    <md-chips collection='vm.itemsCollection' ng-model='vm.selectedUsers' md-title='title' md-thumbnail='thumbnailUrl' md-subtitle='subtitle' disabled='false' md-on-remove="vm.removeChip(vm.selectedUsers.id)" unique='true' />
+                </div>
+                <div>
+                    <ion-list>
+                        <ion-checkbox ng-model="user.checked" ng-checked="user.checked" ng-repeat="user in vm.listRecipients" ng-change="vm.updateRecipients(user)">{{user.username}}<p>{{user.firstName}}&nbsp;{{user.lastName}}</p></ion-checkbox>
+                    </ion-list>
+                </div>
+                <div>
+                    {{vm.selectedUsers}}
+                </div>
+            </div>
+            <div class="panel-footer chat-bottom-bar">
+                <form style="display:flex" ng-submit="vm.submitFunction()">
+                    <div class="input-group">
+                        <textarea class="form-control input-sm chat-input" placeholder="{{vm.inputPlaceholderText}}" ng-model="vm.writingMessage" maxlength="300"></textarea>
+                        <button class="button button-stable button-small">Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </ion-content>
+</ion-view>
