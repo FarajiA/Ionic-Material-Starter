@@ -8,8 +8,7 @@
         vm.messagesIndex = 0;
 
         vm.user = UserStore.data();
-
-
+        
         var unbindGetInbox = $scope.$watch('vm.MessageService.inboxMessages()', function (newVal, oldVal) {
             if (_.has(newVal, 'index')) {
                 vm.Messages = newVal.results;

@@ -8,7 +8,7 @@
            <ion-item class="item-avatar item-icon-right" ng-class="{'bold' : !message.viewed }" href="#/main/messages/{{ message.blast | messageCorrespond: message.userID : message.corresponder }}" ng-repeat="message in vm.Messages" ng-click="vm.MessageViewed($index)" type="item-text-wrap" >
              <img ng-src="{{message.photo == 'True' && imageURL + message.userID + '.png' || 'img/default_avatar.png' }}">
              <h2>{{message.username | messageUsername}}</h2>             
-             <p>{{message.body}}</p>
+             <p>{{message.body | messageDecrypt}}</p>
              <p class="date">{{message.date | messageDate }}</p>
            </ion-item>
         </ion-list>

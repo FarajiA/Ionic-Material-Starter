@@ -1,6 +1,6 @@
 ﻿; (function () {
     var app = angular.module('App');
-    app.controller('ComposeController', ['$scope', '$timeout', '$state', 'UserStore', 'Thread', 'Search', function ($scope, $timeout, $state, UserStore, Thread, Search) {
+    app.controller('ComposeController', ['$scope', '$timeout', '$state', 'Search', 'Thread', 'Messages', function ($scope, $timeout, $state, Search, Thread, Messages) {
 
         $scope.$on("$ionicView.beforeEnter", function () {
             $scope.showTabs.show = false;
@@ -14,6 +14,7 @@
         vm.searchIndex = 0;
         vm.SearchService = Search;
         vm.searchTotal = 0;
+        vm.writingMessage = "";
 
         vm.inputPlaceholderText = composeNewMsg_CONSTANT;
 
@@ -23,21 +24,26 @@
         });
 
         vm.updateRecipients = function (user) {
-            var item = {};
-            item.thumbnailUrl = '././img/tyrion.jpg';
-            item.title = user.username;
-            item.subtitle = user.firstName + ' ' + user.lastName;
-            item.id = user.id;
-            var present = _.some(vm.selectedUsers, ['id', user.id]);
+            if (vm.selectedUsers.length <= 9) {
+                var item = {};
+                item.thumbnailUrl = '././img/tyrion.jpg';
+                item.title = user.username;
+                item.subtitle = user.firstName + ' ' + user.lastName;
+                item.id = user.id;
+                item.checked = user.checked;
+                var present = _.some(vm.selectedUsers, ['id', user.id]);
 
-            if (present) {
-                _.remove(vm.selectedUsers, function (n) {
-                    return n.id === user.id;
-                });
+                if (present) {
+                    _.remove(vm.selectedUsers, function (n) {
+                        return n.id === user.id;
+                    });
+                }
+                else 
+                    vm.selectedUsers.push(item);                
             }
-            else {
-                vm.selectedUsers.push(item);
-            }
+            else 
+                console.log("10 maximum allowed");
+
         };
                 
         vm.itemsCollection = [{
@@ -58,24 +64,29 @@
             if (_.has(newVal, 'index')) {
                 vm.listRecipients = newVal.results;
                 vm.searchTotal = newVal.total;
-                //vm.moBroadcasters = (vm.broadcastersNo > countSet_CONSTANT);
+                vm.moRecipients = (vm.searchTotal > countSet_CONSTANT);
                 vm.searchIndex++;
+
+                _.forEach(vm.selectedUsers, function (parentValue, parentKey) {
+                    var user = _.find(vm.listRecipients, { 'id': parentValue.id });
+                    if (user)
+                        user.checked = true;
+                });
             }
         });
 
-        $scope.$watchCollection('vm.selectedUsers', function (newVal, oldVal) {
-            if (newVal) {
-
-            }
-        });
-
-
-        vm.removeChip = function (user) {
-            console.log(user);
+        vm.mdOnDelete = function (user) {
+            var user = _.find(vm.listRecipients, { 'id': user });
+            user.checked = false;
         };
-        $scope.deleteChips = function (index) {
-            console.log(user);
+
+        vm.submitFunction = function () {
+            Thread.sendMessage(_.map(vm.selectedUsers, 'id'), vm.writingMessage, 0, true).then(function (response) {
+                console.log(response);
+                //Thread.sendNotification(response.messageID);
+            });
         };
+
 
     }]);
 })();

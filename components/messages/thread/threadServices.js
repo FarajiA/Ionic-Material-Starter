@@ -7,11 +7,10 @@
             var deffered = $q.defer();
 
             if (user === 'blast') {
-
-                var activeThread = Messages.active();                
-                $http.get(baseURL_CONSTANT + "api/messages/blast/" + activeThread.messageID + "/" + index + "/" + countSet_CONSTANT, {
-                    cache: false
-                })
+                var activeThread = Messages.active();
+                var recipients = _.split(activeThread.corresponder, ',');
+                var msg = { 'recipients': recipients};
+                $http.post(baseURL_CONSTANT + "api/messages/blast/" + index + "/" + countSet_CONSTANT, msg)
                .success(function (d) {
                    deffered.resolve(d);
                })
@@ -46,9 +45,9 @@
             return deffered.promise;
         };
 
-        Thread.sendMessage = function (recipients, msg, parentMsg) {
+        Thread.sendMessage = function (recipients, msg, parentMsg, blast) {
             var deffered = $q.defer();
-            var msg = { 'SendTo': recipients, 'MessageParentID': parentMsg, 'Body': msg };
+            var msg = { 'SendTo': recipients, 'MessageParentID': parentMsg, 'Body': msg, 'blast': blast };
             $http.post(baseURL_CONSTANT + "api/messages", msg)
             .success(function (d) {
                 deffered.resolve(d);
