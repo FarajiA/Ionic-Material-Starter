@@ -10,7 +10,7 @@
         vm.submitLogin = function (user) {
             if (vm.loginform.$valid) {                
                 AuthService.Login(user).then(function (response) {
-                    $scope.$parent.userInitiate().then(function () {
+                    $scope.$parent.userInitiate(response.userName).then(function () {
                         $state.go("main.dash");
                     }), function (err) {
                         console.log("error logging user in: " + err)
@@ -23,7 +23,7 @@
             if (vm.registerform.$valid) {
                 AuthService.Register(user).then(function (UserAcct) {
                     AuthService.Login(user).then(function (response) {
-                        $scope.$parent.userInitiate();
+                        $scope.$parent.userInitiate(response.userName);
                         $state.go('main.dash');
                     });
                 });

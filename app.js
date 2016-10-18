@@ -1,5 +1,5 @@
 const baseURL_CONSTANT = "http://localhost:59822/";
-const imgURL_CONSTANT = baseURL_CONSTANT + "photos/";
+const imgURL_CONSTANT = "http://localhost:59822/photos/";
 const signalRURL_CONSTANT = baseURL_CONSTANT + "socketpocket";
 const clientID_CONSTANT = "ngAuthApp";
 const refreshTokenLife_CONSTANT = 7;
@@ -36,7 +36,7 @@ var app = angular.module('App',
         */
 ]);
 
-app.run(function (AuthService, Encryption, $state, $rootScope, $ionicPlatform) {
+app.run(function (AuthService, $state, $rootScope, $ionicPlatform) {
     $ionicPlatform.ready(function() {
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
         // for form inputs)
@@ -50,8 +50,7 @@ app.run(function (AuthService, Encryption, $state, $rootScope, $ionicPlatform) {
     });
 
     AuthService.fillAuthData();
-    Encryption.fillKeyData();
-    
+
     $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
 
         var authdata = AuthService.authentication;
@@ -99,6 +98,14 @@ function RouteMethods($stateProvider, $urlRouterProvider, $httpProvider, $ionicC
                         SearchService.search(event.target.value, 0);
                     }
                 });
+
+                scope.deleteChips = function (index) {
+                    var selected = scope.ngModel[index];
+
+
+                    //this.clearActive();
+                };
+
 
                 return link.apply(this, arguments);
             };
@@ -499,7 +506,7 @@ app.value('RefreshCount', {
     count: 0
 });
 
-app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$ionicModal', 'AuthService', 'Encryption', 'UserStore', 'Traffic', 'Activity', 'Messages', 'CentralHub', 'toaster', function ($scope, $q, $state, $stateParams, $ionicModal, AuthService, Encryption, UserStore, Traffic, Activity, Messages, CentralHub, $toaster) {
+app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', 'AuthService', 'UserStore', 'Traffic', 'Activity', 'Messages', 'CentralHub', 'toaster', function ($scope, $q, $state, $stateParams, AuthService, UserStore, Traffic, Activity, Messages, CentralHub, $toaster) {
 
     var mc = this;
 
@@ -537,38 +544,10 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
         }
     };
 
-    $ionicModal.fromTemplateUrl('passphrase.html', {
-        scope: $scope,
-        animation: 'slide-in-up'
-    }).then(function (modal) {
-        mc.phraseModal = modal;
-    });
-    
-    $scope.openModal = function () {
-        mc.phraseModal.show();
-    };
-    $scope.closeModal = function () {
-        mc.phraseModal.hide();
-    };
-
-    // Cleanup the modal when we're done with it!
-    $scope.$on('$destroy', function () {
-        mc.phraseModal.remove();
-    });
-    // Execute action on hide modal
-    $scope.$on('modal.hidden', function () {
-        // Execute action
-    });
-    // Execute action on remove modal
-    $scope.$on('modal.removed', function () {
-        // Execute action
-    });
-
-    $scope.userInitiate = function () {
+    $scope.userInitiate = function (username) {
         var deffered = $q.defer();
-        UserStore.setUser().then(function (response) {
+        UserStore.setUser(username).then(function (response) {
             $scope.user = response;
-            Encryption.Key.publicKey = response.publicKey;
             $q.all([
                 Traffic.chasers(0),
                 Traffic.chasing(0),
@@ -601,18 +580,14 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
             deffered.reject(error);
         }).finally(function () {
             mc.loadingDone = true;
-
-            if (_.isEmpty(Encryption.Key.privateKey))
-                mc.phraseModal.show();
         });
 
         return deffered.promise;
     };
 
     if (authdata.isAuth) {
-        $scope.userInitiate();
-    }
-    else {
+        $scope.userInitiate(authdata.userName);
+    } else {
         mc.loadingDone = true;
     }
 
@@ -677,7 +652,7 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
     });
     
     $scope.$parent.$on("tokenRefreshed", function () {
-        $scope.userInitiate();        
+        $scope.userInitiate(authdata.userName);        
     });
 
     $scope.$parent.$on("centralHubMessage", function (e, message) {
@@ -694,12 +669,15 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
                 var msgResults = Messages.inboxMessages();
                 message.viewed = true;
                 Messages.viewed(message.corresponder).then(function (response) {
+                    var stuff = Messages.inboxMessages();
                     Messages.updateThread(message, false);
                 }); 
             }
         }
         else
-            Messages.updateThread(message, true);       
+            Messages.updateThread(message, true);
+
+       
     });
 
     mc.CheckBadge = function (badge) {
@@ -723,28 +701,6 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
             console.log("stuff yea whatever");
             return true;
         });
-    };
-
-    mc.savePhrase = function () {
-        if (_.isEmpty(Encryption.Key.publicKey)) {
-            Encryption.generatePrivateKey(mc.passPhrase).then(function (response) {
-                if (response)
-                    mc.phraseModal.hide();
-            });
-        }
-        else {
-            Encryption.verifyPassphrase(mc.passPhrase).then(function (response) {
-                if (response) {
-                    Encryption.generatePrivateKey(mc.passPhrase).then(function (response) {
-                        if (response)
-                            mc.phraseModal.hide();
-                    });
-                }
-                else {
-                    console.log("Didn't Match");
-                }
-            });
-        }
     };
 
 }]);

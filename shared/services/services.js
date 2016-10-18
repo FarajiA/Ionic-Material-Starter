@@ -4,9 +4,9 @@
     var data = [];
     var UserObject = {};
 
-    UserObject.setUser = function () {
+    UserObject.setUser = function (guid) {
         var deffered = $q.defer();
-        $http.get(baseURL_CONSTANT + "api/accounts/user")
+        $http.get(baseURL_CONSTANT + "api/accounts/user/" + guid)
         .success(function (d) {
             data = d.result;
             deffered.resolve(d.result);
@@ -68,86 +68,6 @@
         sendRequest: sendRequest
     };
 
-   }])
-     .factory('Encryption', ['$http', '$q', 'localStorageService', 'AuthService', 'UserStore', function ($http, $q, localStorageService, AuthService, UserStore) {
-         var EncryptionObject = this;
-         
-         var key = [];
-         var Bits = 512;
-
-         EncryptionObject.Key = {
-             privateKey: "",
-             publicKey: ""
-         };
-
-         EncryptionObject.fillKeyData = function () {
-             var keyData = localStorageService.get('KeyData');
-             if (!_.isEmpty(keyData)) {
-                 EncryptionObject.Key.privateKey = keyData.privateKey;
-                 EncryptionObject.Key.publicKey = keyData.publicKey;
-             }             
-         };
-
-         EncryptionObject.generatePrivateKey = function (passphrase) {
-             var deffered = $q.defer();             
-             var RSAkey = cryptico.generateRSAKey(passphrase, Bits);
-             var publicKey = cryptico.publicKeyString(RSAkey);
-             var msg = { 'key': publicKey };
-
-             $http.post(baseURL_CONSTANT + 'api/accounts/user/publickey', msg).success(function (response) {
-                 EncryptionObject.Key.privateKey = RSAkey;
-                 localStorageService.set('KeyData', { privateKey: RSAkey, publicKey: publicKey });
-                 deffered.resolve(response);
-             }).error(function (err, status) {
-                 deffered.reject(err);
-             });
-             
-             return deffered.promise;
-         };
-
-         EncryptionObject.Encrypt = function (msgPlaintxt, publicKey) {
-             var deffered = $q.defer();
-             var encrypted = cryptico.encrypt(msgPlaintxt, publicKey, EncryptionObject.Key.privateKey);
-             
-             deffered.resolve(encrypted.cipher);
-             return deffered.promise;
-         };
-
-         EncryptionObject.Decrypt = function (msgEncrypted) {
-             var deffered = $q.defer();
-             var decrypted = cryptico.decrypt(msgEncrypted, EncryptionObject.Key.privateKey);
-
-             deffered.resolve(decrypted.plaintext);
-             return deffered.promise;
-         };
-
-         EncryptionObject.userPublicKey = function (userID) {
-             var deffered = $q.defer();             
-             $http.get(baseURL_CONSTANT + 'api/accounts/user/publickey/' + userID).success(function (response) {
-                 deffered.resolve(response);
-             }).error(function (err, status) {
-                 deffered.reject(err);
-             });
-
-             return deffered.promise;
-         };
-
-         EncryptionObject.verifyPassphrase = function (passphrase) {
-             var deffered = $q.defer();
-             
-             var RSAkey = cryptico.generateRSAKey(passphrase, Bits);
-             var publicKey = cryptico.publicKeyString(RSAkey);
-
-             if (publicKey === this.Key.publicKey)
-                 deffered.resolve(true);
-             else
-                 deffered.resolve(false);
-
-             return deffered.promise;
-         };
-
-
-         return EncryptionObject;
-     }]);
+   }]);
 
 })();

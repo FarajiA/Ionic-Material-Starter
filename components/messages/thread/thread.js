@@ -50,7 +50,7 @@
             activeMessage = Messages.active();
 
             var recipients = _.split(activeMessage.corresponder, ',');
-            Thread.sendMessage(recipients, msg, activeMessage.messageID, activeMessage.blast).then(function (response) {
+            Thread.sendMessage(recipients, msg, activeMessage.messageID).then(function (response) {
                 if (response) {
                     Thread.sendNotification(response.messageID);
                     Messages.updateActive(response)

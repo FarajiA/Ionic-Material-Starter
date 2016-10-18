@@ -66,13 +66,6 @@
 
             return updated;
         }
-    }])
-    .filter('messageDecrypt', ['Encryption', function (Encryption) {
-
-        return function (message) {
-            var updated = Encryption.Decrypt(message);
-            return updated;
-        }
     }]);
         
 
