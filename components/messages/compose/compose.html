@@ -18,7 +18,7 @@
             <div class="panel-footer chat-bottom-bar">
                 <form style="display:flex" ng-submit="vm.submitFunction()">
                     <div class="input-group">
-                        <textarea class="form-control input-sm chat-input" placeholder="{{vm.inputPlaceholderText}}" ng-model="vm.writingMessage" maxlength="300"></textarea>
+                        <textarea class="form-control input-sm chat-input" placeholder="{{vm.inputPlaceholderText}}" ng-model="vm.writingMessage" ng-maxlength="300"></textarea>
                         <button class="button button-stable button-small">Send</button>
                     </div>
                 </form>

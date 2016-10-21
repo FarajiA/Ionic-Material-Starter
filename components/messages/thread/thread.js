@@ -1,7 +1,8 @@
 ﻿; (function () {
     var app = angular.module('App');
-    app.controller('ThreadController', ['$scope', '$timeout', '$state', '$stateParams', '$filter', 'Thread', 'Messages', 'UserStore', function ($scope, $timeout, $state, $stateParams, $filter, Thread, Messages, UserStore) {
-        
+    app.controller('ThreadController', ['$scope', '$timeout', '$state', '$stateParams', '$filter', '$templateCache', 'Thread', 'Messages', 'UserStore', function ($scope, $timeout, $state, $stateParams, $filter, $templateCache, Thread, Messages, UserStore) {
+
+        //$templateCache.removeAll();
         $scope.$on("$ionicView.beforeEnter", function () {
                 $scope.showTabs.show = false;
         });
@@ -41,16 +42,18 @@
             }
         });
 
-
         vm.sendMessage = function (msg) {
-            var msgObject = { 'username': vm.user.userName, 'body': msg, 'date': new Date() };            
+            var msgObject = { 'username': vm.user.userName, 'body': msg, 'date': new Date() };
             vm.MessageThread.push(msgObject);
-            
-            //var recipients = [vm.userID];
             activeMessage = Messages.active();
 
+            var publicKeys = _.split(activeMessage.publickey, ',');
+            publicKeys.unshift(vm.user.publicKey);
+
             var recipients = _.split(activeMessage.corresponder, ',');
-            Thread.sendMessage(recipients, msg, activeMessage.messageID).then(function (response) {
+            recipients.unshift(vm.user.id);
+
+            Thread.sendMessage(recipients, msg, activeMessage.messageID, publicKeys).then(function (response) {
                 if (response) {
                     Thread.sendNotification(response.messageID);
                     Messages.updateActive(response)
