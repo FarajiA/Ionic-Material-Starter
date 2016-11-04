@@ -72,7 +72,7 @@
      .factory('Encryption', ['$http', '$q', 'localStorageService', 'AuthService', 'UserStore', function ($http, $q, localStorageService, AuthService, UserStore) {
          var EncryptionObject = this;
 
-         var key = [];
+         var keys = [];
          var Bits = 512;
 
          //escape the string then encode function
@@ -94,11 +94,25 @@
              publicKey: ""
          };
 
+         EncryptionObject.addKey = function (value) {
+             var deffered = $q.defer();
+             keys = keys.concat(value);
+             deffered.resolve(keys);
+             return deffered.promise;
+         };
+
+         EncryptionObject.clearKeys = function () {
+             _.remove(keys, function (k) {
+                 return k != EncryptionObject.Key.publicKey;
+             });
+         };
+
          EncryptionObject.fillKeyData = function () {
              var keyData = localStorageService.get('KeyData');
              if (!_.isEmpty(keyData)) {
                  EncryptionObject.Key.privateKey = cryptico.generateRSAKey(Base64Decode(keyData.privateKey), Bits);
                  EncryptionObject.Key.publicKey = keyData.publicKey;
+                 keys.push(EncryptionObject.Key.publicKey);
              }
          };
 
@@ -129,7 +143,6 @@
          EncryptionObject.Encrypt = function (msgPlaintxt, publicKey) {
              var deffered = $q.defer();
              var encrypted = cryptico.encrypt(msgPlaintxt, publicKey, EncryptionObject.Key.privateKey);
-
              deffered.resolve(encrypted.cipher);
              return deffered.promise;
          };
@@ -137,7 +150,6 @@
          EncryptionObject.Decrypt = function (msgEncrypted) {
              var deffered = $q.defer();
              var decrypted = cryptico.decrypt(msgEncrypted, EncryptionObject.Key.privateKey);
-
              deffered.resolve(decrypted.plaintext);
              return deffered.promise;
          };
@@ -166,8 +178,8 @@
 
              return deffered.promise;
          };
-
-
+         
+         EncryptionObject.ActiveKeys = function () { return keys; };
          return EncryptionObject;
      }]);
 

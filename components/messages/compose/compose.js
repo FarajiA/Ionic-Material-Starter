@@ -1,6 +1,6 @@
 ﻿; (function () {
     var app = angular.module('App');
-    app.controller('ComposeController', ['$scope', '$timeout', '$state', 'UserStore', 'Thread', 'Search', function ($scope, $timeout, $state, UserStore, Thread, Search) {
+    app.controller('ComposeController', ['$scope', '$timeout', '$state', 'Search', 'Thread', 'Encryption', 'Messages', function ($scope, $timeout, $state, Search, Thread, Encryption, Messages) {
 
         $scope.$on("$ionicView.beforeEnter", function () {
             $scope.showTabs.show = false;
@@ -14,6 +14,9 @@
         vm.searchIndex = 0;
         vm.SearchService = Search;
         vm.searchTotal = 0;
+        vm.writingMessage = "";
+        vm.listRecipients = [];
+        vm.keys = [];
 
         vm.inputPlaceholderText = composeNewMsg_CONSTANT;
 
@@ -23,23 +26,32 @@
         });
 
         vm.updateRecipients = function (user) {
-            var item = {};
-            item.thumbnailUrl = '././img/tyrion.jpg';
-            item.title = user.username;
-            item.subtitle = user.firstName + ' ' + user.lastName;
-            item.id = user.id;
-            var present = _.some(vm.selectedUsers, ['id', user.id]);
+            if (vm.selectedUsers.length <= 9) {
+                var present = _.some(vm.selectedUsers, ['id', user.id]);             
 
-            if (present) {
-                _.remove(vm.selectedUsers, function (n) {
-                    return n.id === user.id;
-                });
+                if (present) {
+                    _.remove(vm.selectedUsers, function (n) {
+                        return n.id === user.id;
+                    });
+                }
+                else {
+                    var item = {};
+                    item.thumbnailUrl = '././img/tyrion.jpg';
+                    item.title = user.username;
+                    item.subtitle = user.firstName + ' ' + user.lastName;
+                    item.id = user.id;
+                    item.checked = user.checked;
+                    item.publickey = user.publicKey
+                    vm.keys = vm.keys.concat(item.publickey);
+                    vm.selectedUsers.push(item);
+                }
             }
-            else {
-                vm.selectedUsers.push(item);
-            }
+            else 
+                console.log("10 maximum allowed");
+
         };
-                
+        
+        // demo of initial collection used for md Chips
         vm.itemsCollection = [{
             thumbnailUrl: '././img/sansa.jpg',
             title: 'Sansa Stark',
@@ -58,24 +70,39 @@
             if (_.has(newVal, 'index')) {
                 vm.listRecipients = newVal.results;
                 vm.searchTotal = newVal.total;
-                //vm.moBroadcasters = (vm.broadcastersNo > countSet_CONSTANT);
+                vm.moRecipients = (vm.searchTotal > countSet_CONSTANT);
                 vm.searchIndex++;
+
+                _.forEach(vm.selectedUsers, function (parentValue, parentKey) {
+                    var user = _.find(vm.listRecipients, { 'id': parentValue.id });
+                    if (user)
+                        user.checked = true;
+                });
             }
         });
 
-        $scope.$watchCollection('vm.selectedUsers', function (newVal, oldVal) {
-            if (newVal) {
-
-            }
-        });
-
-
-        vm.removeChip = function (user) {
-            console.log(user);
+        vm.mdOnDelete = function (id) {
+            var user = _.find(vm.listRecipients, { 'id': id });
+            user.checked = false;
         };
-        $scope.deleteChips = function (index) {
-            console.log(user);
+
+        vm.submitFunction = function () {
+            Encryption.clearKeys();
+            //_.split(response.publickey, ',')
+            Encryption.addKey(vm.keys).then(function (response) {
+                var selected = _.map(vm.selectedUsers, 'id');
+                selected.unshift($scope.user.id);
+                Thread.sendMessage(selected, vm.writingMessage, 0, vm.selectedUsers.length > 1).then(function (response) {
+                    Messages.updateThread(response, false);
+                    console.log(response);
+                    Thread.sendNotification(response.messageID);
+                });
+              
+            });
+
+
         };
+
 
     }]);
 })();

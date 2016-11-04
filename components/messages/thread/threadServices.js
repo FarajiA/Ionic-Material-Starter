@@ -2,7 +2,7 @@
     angular.module('App').factory("Thread", ['$http', '$q', 'Messages', 'UserStore', 'Encryption', function ($http, $q, Messages, UserStore, Encryption) {
         var messages = [];
         var Thread = {};
-
+        //var keys = [Encryption.Key.publicKey];       
 
         Thread.thread = function (index, user) {
             var deffered = $q.defer();
@@ -46,19 +46,19 @@
             return deffered.promise;
         };
 
-        Thread.sendMessage = function (recipients, msg, parentMsg, publickeys) {
+        Thread.sendMessage = function (recipients, msg, parentMsg, blast) {
             var deffered = $q.defer();
             
             var promises = [];
             var msgsArray = [];
             
-            _.forEach(publickeys, function (value) {
+            _.forEach(Encryption.ActiveKeys(), function (value) {
                 updateMsg(value);
             });
 
             $q.all(promises).then(function (value) {
                 var zippedMsgs = _.zipObject(recipients, msgsArray);
-                var msg = { 'MessageParentID': parentMsg, 'Body': zippedMsgs };
+                var msg = { 'Blast': blast, 'MessageParentID': parentMsg, 'Body': zippedMsgs };
                 $http.post(baseURL_CONSTANT + "api/messages", msg)
                 .success(function (d) {
                     deffered.resolve(d);
@@ -75,7 +75,6 @@
                     msgsArray.push(response);
                     innerDeffered.resolve(response);
                 });
-
                 promises.push(innerDeffered); // add promise to array
             };
 
@@ -90,6 +89,7 @@
                 deffered.resolve(d);
             })
             .error(function (data, status) {
+                deffered.reject(data);
                 console.log("Request failed " + status);
             });
             return deffered.promise;
@@ -102,12 +102,13 @@
                deffered.resolve(d);
             })
             .error(function (data, status) {
+                deffered.reject(data);
                console.log("Request failed " + status);
             });
 
             return deffered.promise;
         };
-
+        
         Thread.messageThread = function () { return messages; };
         return Thread;
     }]);

@@ -1,6 +1,6 @@
 ﻿; (function () {
     var app = angular.module('App');
-    app.controller('MessagesController', ['$scope', '$q', 'UserStore', 'Messages', function ($scope, $q, UserStore, Messages) {
+    app.controller('MessagesController', ['$scope', '$q', 'UserStore', 'Messages', 'Encryption', function ($scope, $q, UserStore, Messages, Encryption) {
         
         var vm = this;
         vm.MessageService = Messages;
@@ -8,7 +8,6 @@
         vm.messagesIndex = 0;
 
         vm.user = UserStore.data();
-
 
         var unbindGetInbox = $scope.$watch('vm.MessageService.inboxMessages()', function (newVal, oldVal) {
             if (_.has(newVal, 'index')) {
@@ -43,11 +42,11 @@
         vm.MessageViewed = function (index) {
             vm.Messages[index].viewed = true;            
             Messages.activemessage(index).then(function (response) {
+                Encryption.clearKeys();
+                Encryption.addKey(_.split(response.publickey, ','));
                 if (!response.viewed)
                     Messages.viewed(response.corresponder);
             });
         };
-
-
     }]);
 })();
