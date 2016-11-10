@@ -6,7 +6,7 @@
 
         Thread.thread = function (index, user) {
             var deffered = $q.defer();
-
+            /*
             if (user === 'blast') {
                 var activeThread = Messages.active();
                 var recipients = _.split(activeThread.corresponder, ',');
@@ -19,7 +19,7 @@
                    console.log("Request failed " + status);
                });
 
-            } else {
+            } else { */
                 $http.get(baseURL_CONSTANT + "api/messages/" + user + "/" + index + "/" + countSet_CONSTANT, {
                     cache: false
                 })
@@ -29,7 +29,7 @@
                 .error(function (data, status) {
                     console.log("Request failed " + status);
                 });
-            }
+        //    }
             return deffered.promise;
         };
 
@@ -51,6 +51,8 @@
             
             var promises = [];
             var msgsArray = [];
+
+            var recipientsKeytoObject = {};
             
             _.forEach(Encryption.ActiveKeys(), function (value) {
                 updateMsg(value);
