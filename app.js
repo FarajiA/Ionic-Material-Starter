@@ -465,16 +465,13 @@ app.factory('authInterceptorService', ['$q', '$rootScope', '$injector', 'localSt
         if (rejection.status === 401) {
             var authService = $injector.get('AuthService');
             var jwtHelper = $injector.get('jwtHelper');
-            var refreshCount = $injector.get('RefreshCount');
             var state = $injector.get('$state');
             var authData = localStorageService.get('authorizationData');
 
             var date = jwtHelper.getTokenExpirationDate(authData.token);
             var expired = jwtHelper.isTokenExpired(authData.token);
 
-            if (expired || refreshCount.count === 0) {
                 authService.refreshToken().then(function (response) {
-                    refreshCount.count++;
                     $rootScope.$emit("tokenRefreshed");
                     console.log("refresh token");
                 },
@@ -482,8 +479,7 @@ app.factory('authInterceptorService', ['$q', '$rootScope', '$injector', 'localSt
                      console.log("an error");
                      state.go("login");
                  });
-                return $q.reject(rejection);
-            }
+
             authService.logOut();
         }
         return $q.reject(rejection);
@@ -494,10 +490,6 @@ app.factory('authInterceptorService', ['$q', '$rootScope', '$injector', 'localSt
 
     return authInterceptorServiceFactory;
 }]);
-
-app.value('RefreshCount', {
-    count: 0
-});
 
 app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$ionicModal', 'AuthService', 'Encryption', 'UserStore', 'Traffic', 'Activity', 'Messages', 'CentralHub', 'toaster', function ($scope, $q, $state, $stateParams, $ionicModal, AuthService, Encryption, UserStore, Traffic, Activity, Messages, CentralHub, $toaster) {
 
@@ -534,6 +526,15 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
             Activity.viewed().then(function (response) {
                 $scope.badge.Activity = 0;
             });
+        }
+    };
+
+    mc.badgeMessageCheck = function (msgsArray) {
+        if (_.isEqual($scope.badge.Messages, 1)) {
+            var messages = _.some(msgsArray.results, ['viewed', false]);
+
+
+
         }
     };
 
@@ -699,7 +700,9 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
             }
         }
         else
-            Messages.updateThread(message, true);       
+            Messages.updateThread(message, true).then(function (response) {
+                $scope.badge.Messages = 1;
+            });
     });
 
     mc.CheckBadge = function (badge) {

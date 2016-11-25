@@ -93,7 +93,7 @@
              privateKey: "",
              publicKey: ""
          };
-
+         /*
          EncryptionObject.addKey = function (value) {
              var deffered = $q.defer();
              keys = keys.concat(value);
@@ -106,7 +106,7 @@
                  return k != EncryptionObject.Key.publicKey;
              });
          };
-
+         */
          EncryptionObject.fillKeyData = function () {
              var keyData = localStorageService.get('KeyData');
              if (!_.isEmpty(keyData)) {
@@ -140,10 +140,15 @@
              return deffered.promise;
          };
 
-         EncryptionObject.Encrypt = function (msgPlaintxt, publicKey) {
+         EncryptionObject.Encrypt = function (msgObject) {
              var deffered = $q.defer();
-             var encrypted = cryptico.encrypt(msgPlaintxt, publicKey, EncryptionObject.Key.privateKey);
-             deffered.resolve(encrypted.cipher);
+             var encrypted = cryptico.encrypt(msgObject.msg, msgObject.key, EncryptionObject.Key.privateKey);
+             var object = {
+                 'id': msgObject.id,
+                 'key': msgObject.key,
+                 'msg': encrypted.cipher
+             };
+             deffered.resolve(object);
              return deffered.promise;
          };
 

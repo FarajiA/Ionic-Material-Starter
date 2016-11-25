@@ -42,8 +42,13 @@
         vm.MessageViewed = function (index) {
             vm.Messages[index].viewed = true;            
             Messages.activemessage(index).then(function (response) {
-                Encryption.clearKeys();
-                Encryption.addKey(_.split(response.publickey, ','));
+               // Encryption.clearKeys();
+                // Encryption.addKey(_.split(response.publickey, ','));
+                var unviewed = _.some(vm.Messages, ['viewed', false]);
+                
+                if (!unviewed)
+                    $scope.badge.Messages = "";
+
                 if (!response.viewed)
                     Messages.viewed(response.corresponder);
             });

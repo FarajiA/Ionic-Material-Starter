@@ -46,23 +46,26 @@
             return deffered.promise;
         };
 
-        Thread.sendMessage = function (recipients, msg, parentMsg, blast) {
+        Thread.sendMessage = function (recipients, msg, parentMsg) {
             var deffered = $q.defer();
             
             var promises = [];
             var msgsArray = [];
+            var dict = new Object();
 
-            var recipientsKeytoObject = {};
-            
-            _.forEach(Encryption.ActiveKeys(), function (value) {
-                updateMsg(value);
+            _.forEach(recipients, function (value) {
+                var userObject = {
+                    'id': value[0],
+                    'key': value[1],
+                    'msg': msg
+                }
+                updateMsgAndKeys(userObject);
             });
-
-            $q.all(promises).then(function (value) {
-                var zippedMsgs = _.zipObject(recipients, msgsArray);
-                var msg = { 'Blast': blast, 'MessageParentID': parentMsg, 'Body': zippedMsgs };
+            
+            $q.all(promises).then(function (value) {                
+                var msg = { 'MessageParentID': parentMsg, 'Body': dict };                
                 $http.post(baseURL_CONSTANT + "api/messages", msg)
-                .success(function (d) {
+                .success(function (d) {                    
                     deffered.resolve(d);
                 })
                 .error(function (data, status) {
@@ -70,12 +73,11 @@
                     console.log("Request failed " + status);
                 });
             });            
-
-            function updateMsg(key) {
+            
+            function updateMsgAndKeys(userObject) {
                 var innerDeffered = $q.defer();
-                Encryption.Encrypt(msg, key).then(function (response) {
-                    msgsArray.push(response);
-                    innerDeffered.resolve(response);
+                Encryption.Encrypt(userObject).then(function (response) {                   
+                    innerDeffered.resolve(dict[response.id] = response.msg);
                 });
                 promises.push(innerDeffered); // add promise to array
             };

@@ -37,19 +37,34 @@
 
         Message.updateThread = function (msg, refresh) {
             var deffered = $q.defer();
+            var promises = [];
 
          if (refresh) {
                 this.inbox(0).then(function (response) {
                     deffered.resolve(response);
                 });
          }        
-          else {
-              _.remove(inboxMessages.results, function (n) {
-                  return n.corresponder === msg.corresponder;
-              });
-                inboxMessages.results.unshift(msg);
-                deffered.resolve(inboxMessages.results);
-            }
+         else {
+
+             var correspondents = _.split(msg.corresponder, ',');
+             var usernames = _.split(msg.username, ',');
+             var publickeys = _.split(msg.publickey, ',');
+
+             var zipped = _.zip(correspondents, usernames, publickeys);
+             
+             _.forEach(zipped, function (value) {
+                 _.remove(inboxMessages.results, function (n) {
+                     return n.corresponder === value[0];
+                 });
+                 var newMsg = angular.copy(msg);
+                 newMsg.corresponder = value[0];
+                 newMsg.username = value[1];
+                 newMsg.publickey = value[2];
+                 inboxMessages.results.unshift(newMsg);
+             });
+
+             deffered.resolve(inboxMessages.results);
+         }
             return deffered.promise;
         };
 

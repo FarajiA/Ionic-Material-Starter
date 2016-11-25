@@ -1,6 +1,6 @@
 ﻿; (function () {
     var app = angular.module('App');
-    app.controller('ThreadController', ['$scope', '$timeout', '$state', '$stateParams', '$filter', '$templateCache', 'Thread', 'Messages', 'Encryption', 'UserStore', function ($scope, $timeout, $state, $stateParams, $filter, $templateCache, Thread, Messages, Encryption, UserStore) {
+    app.controller('ThreadController', ['$scope', '$timeout', '$state', '$stateParams', '$filter', '$templateCache', 'Thread', 'Messages', 'Encryption', function ($scope, $timeout, $state, $stateParams, $filter, $templateCache, Thread, Messages, Encryption) {
         //$templateCache.removeAll();
         $scope.$on("$ionicView.beforeEnter", function () {
                 $scope.showTabs.show = false;
@@ -17,7 +17,7 @@
 
         vm.userID = $stateParams.userID;
         vm.threadIndex = 0;
-        vm.user = UserStore.data();
+        vm.user = $scope.user;
 
         var extra = $state.current.name;
         
@@ -42,16 +42,21 @@
 
         vm.sendMessage = function (msg) {
             var msgObject = { 'username': vm.user.userName, 'date': new Date() };
-            Encryption.Encrypt(msg, vm.user.publicKey).then(function (response) {
-                msgObject.body = response;
+            var userMsgObject = {
+                'id': vm.user.id,
+                'key': vm.user.publicKey,
+                'msg': msg
+            }
+            Encryption.Encrypt(userMsgObject).then(function (response) {
+                msgObject.body = response.msg;
                 vm.MessageThread.push(msgObject);
             });
 
             activeMessage = Messages.active();
-            var recipients = _.split(activeMessage.corresponder, ',');
-            recipients.unshift(vm.user.id);
+            var recipients = [[activeMessage.corresponder, activeMessage.publickey]];
+            recipients.unshift([vm.user.id, vm.user.publicKey]);
             
-            Thread.sendMessage(recipients, msg, activeMessage.messageID, activeMessage.blast).then(function (response) {
+            Thread.sendMessage(recipients, userMsgObject.msg, activeMessage.messageID).then(function (response) {
                 if (response) {
                     Thread.sendNotification(response.messageID);
                     Messages.updateActive(response)

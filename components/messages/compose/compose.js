@@ -45,7 +45,7 @@
                     vm.keys = vm.keys.concat(item.publickey);
                     vm.selectedUsers.push(item);
                 }
-            }
+           }
             else 
                 console.log("10 maximum allowed");
 
@@ -87,18 +87,20 @@
         };
 
         vm.submitFunction = function () {
-            Encryption.clearKeys();
-            //_.split(response.publickey, ',')
-            Encryption.addKey(vm.keys).then(function (response) {
-                var selected = _.map(vm.selectedUsers, 'id');
-                selected.unshift($scope.user.id);
-                Thread.sendMessage(selected, vm.writingMessage, 0, vm.selectedUsers.length > 1).then(function (response) {
-                    Messages.updateThread(response, false);
-                    console.log(response);
-                    Thread.sendNotification(response.messageID);
+            //Encryption.clearKeys();
+            //_.split(response.publickey, ',') 
+            //Encryption.addKey(vm.keys).then(function (response) {
+            var selected = _.zip(_.map(vm.selectedUsers, 'id'), _.map(vm.selectedUsers, 'publickey'));
+            var userKey = [$scope.user.id, $scope.user.publicKey];
+            selected.unshift(userKey);
+            Thread.sendMessage(selected, vm.writingMessage, 0).then(function (response) {               
+                Messages.updateThread(response, false).then(function(response){
+                    $state.go("main.messages");
                 });
-              
+                Thread.sendNotification(response.messageID);
             });
+              
+            //});
 
 
         };
