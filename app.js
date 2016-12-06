@@ -16,6 +16,11 @@ const newRequest_CONSTANT = "{0} sent you a request.";
 const newChasing_CONSTANT = "{0} accepted your request.";
 const newChaser_CONSTANT = "{0} started chasing you.";
 const composeNewMsg_CONSTANT = "Enter message";
+const groupDeleteConfirmTitle_CONSTANT = "Delete {0} group?";
+const groupAddButtonText_CONSTANT = "Add Group";
+const groupSaveButtonText_CONSTANT = "Save Group";
+
+ionic.Gestures.gestures.Hold.defaults.hold_threshold = 20;
 
 var app = angular.module('App', 
         ['ionic',
@@ -24,7 +29,7 @@ var app = angular.module('App',
         'ionic-material',
         'ionMdInput',
         'toaster',
-        'starter.controllers',
+        //'starter.controllers',
         'angular-jwt',
         'irontec.simpleChat',
         'mdChips'//,
@@ -265,7 +270,44 @@ function RouteMethods($stateProvider, $urlRouterProvider, $httpProvider, $ionicC
                       });
                   }
               ]}
+      })
+      .state('groups', {
+          url: '/groups',
+          templateUrl: 'components/groups/groups.html',
+          controller: 'GroupsController as vm',
+          resolve: {
+              loadExternals: [
+                  '$ocLazyLoad', function ($ocLazyLoad) {
+                      return $ocLazyLoad.load({
+                          name: 'groups',
+                          files: [
+                              'components/groups/groups.js',
+                              'components/groups/groupServices.js'
+                          ]
+                      });
+                  }
+              ]
+          }
+      })      
+      .state('group-edit', {
+          url: '/groups/edit/:groupID',
+          templateUrl: 'components/groups/edit/editGroups.html',
+          controller: 'AddEditController as vm',
+          resolve: {
+              loadExternals: [
+                  '$ocLazyLoad', function ($ocLazyLoad) {
+                      return $ocLazyLoad.load({
+                          name: 'groupsAddEdit',
+                          files: [
+                            'components/groups/edit/editGroups.js',
+                            'components/search/searchServices.js'
+                          ]
+                      });
+                  }
+              ]
+          }
       });
+      
 
     $urlRouterProvider.otherwise(function ($injector) {
         var $state = $injector.get("$state");

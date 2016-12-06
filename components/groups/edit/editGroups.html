@@ -1,0 +1,40 @@
+﻿<ion-view view-title="Create Group" hide-tabs>
+    <ion-content class="padding">
+            <div class="list">
+                <label class="item item-input item-floating-label input-calm">
+                    <span class="input-label">Group Name</span>
+                    <input type="text" ng-maxlength="50" placeholder="Group Name" ng-model="vm.groupName">
+                </label>
+                <label class="item item-input item-floating-label input-calm">
+                    <span class="input-label">Search Members</span>
+                    <input type="text" ng-maxlength="100" placeholder="Search Members" ng-model="vm.searchGroup">
+                </label>
+            </div>
+            <div class="button-bar">
+                <a class="button" ng-class="{'active' : vm.showChasers }" ng-click="vm.showChasers = true;">Chasers</a>
+                <a class="button" ng-class="{'active' : !vm.showChasers }" ng-click="vm.showChasers = false;">Members <i class="icon ion-ios7-telephone-outline"><span class="badge badge-stable icon-badge">{{vm.groupMembersTotal}}</span></i></a>
+            </div>
+            
+            <div ng-show="vm.showChasers">
+                <ion-list>
+                    <ion-checkbox ng-model="user.checked" ng-checked="user.checked" ng-repeat="user in vm.listChasers" ng-change="vm.updateRecipients(user)"><img ng-src="{{user.photo && imageURL + member.id + '.png' || 'img/default_avatar.png' }}"> {{user.username}}<p>{{user.firstName}}&nbsp;{{user.lastName}}</p></ion-checkbox>
+                </ion-list>
+                <ion-infinite-scroll ng-if="vm.moChasers" on-infinite="vm.loadMoreChasers()" distance="30%"></ion-infinite-scroll>
+            </div>
+            <div ng-show="!vm.showChasers">
+            <ion-list>
+                <ion-item class="item-avatar item-icon-right" ng-repeat="member in vm.Members" type="item-text-wrap">
+                    <img ng-src="{{member.photo && imageURL + member.id + '.png' || 'img/default_avatar.png' }}">
+                    <h2>{{member.username}}</h2>
+                    <p>{{member.firstName}}&nbsp;{{member.lastName}}</p>
+                    <i class="icon ion-chatbubble muted"></i>
+                </ion-item>
+            </ion-list>
+            <ion-infinite-scroll ng-if="vm.moMembers" on-infinite="vm.loadMoreMembers()" distance="30%"></ion-infinite-scroll>
+            </div>           
+            <ion-footer-bar align-title="center" class="bar-stable">
+                <button class="button button-block button-stable">{{vm.buttonText}}</button>
+            </ion-footer-bar>           
+
+        </ion-content>
+</ion-view>

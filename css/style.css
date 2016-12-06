@@ -244,3 +244,9 @@ width: 60%;
 :not(.no-enter)#toast-container > div.ng-enter {
      top: -50px;
 }
+
+/* Groups 
+======================================
+.groups .group-item h2 {display:inline}
+.groups .group-item p {display:inline; font-size:12px}
+ */
