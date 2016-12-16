@@ -18,7 +18,10 @@ const newChaser_CONSTANT = "{0} started chasing you.";
 const composeNewMsg_CONSTANT = "Enter message";
 const groupDeleteConfirmTitle_CONSTANT = "Delete {0} group?";
 const groupAddButtonText_CONSTANT = "Add Group";
-const groupSaveButtonText_CONSTANT = "Save Group";
+const groupSaveButtonText_CONSTANT = "Save Changes";
+const groupEditGroup_CONSTANT = "Edit Group";
+const groupNewGroup_CONSTANT = "New Group";
+const groupMax_CONSTANT = "10 members maximum";
 
 ionic.Gestures.gestures.Hold.defaults.hold_threshold = 20;
 
