@@ -93,20 +93,7 @@
              privateKey: "",
              publicKey: ""
          };
-         /*
-         EncryptionObject.addKey = function (value) {
-             var deffered = $q.defer();
-             keys = keys.concat(value);
-             deffered.resolve(keys);
-             return deffered.promise;
-         };
 
-         EncryptionObject.clearKeys = function () {
-             _.remove(keys, function (k) {
-                 return k != EncryptionObject.Key.publicKey;
-             });
-         };
-         */
          EncryptionObject.fillKeyData = function () {
              var keyData = localStorageService.get('KeyData');
              if (!_.isEmpty(keyData)) {
@@ -186,6 +173,26 @@
          
          EncryptionObject.ActiveKeys = function () { return keys; };
          return EncryptionObject;
+     }]).factory('Broadcast', ['$http', '$q', function ($http, $q) {
+         var data = [];
+         var Broadcast = {};
+
+         Broadcast.setUser = function () {
+             var deffered = $q.defer();
+             $http.get(baseURL_CONSTANT + "api/accounts/user/")
+             .success(function (d) {
+                 data = d.result;
+                 deffered.resolve(d.result);
+             })
+             .error(function (data, status) {
+                 deffered.reject(data);
+                 console.log("Request failed " + status);
+             });
+             return deffered.promise;
+         };
+
+         Broadcast.data = function () { return data; };
+         return Broadcast;
      }]);
 
 })();

@@ -19,7 +19,12 @@
             confirmPopup.then(function (res) {
                 if (res) {
                     Groups.deleteGroup(id).then(function (response) {
-                        console.log("Group deleted");
+                        if (!response) {
+                            var confirmPopup = $ionicPopup.confirm({
+                                title: genericError_CONSTANT
+                            });
+                        }
+
                     });
                 }
             });

@@ -4,7 +4,12 @@ const signalRURL_CONSTANT = baseURL_CONSTANT + "socketpocket";
 const clientID_CONSTANT = "ngAuthApp";
 const refreshTokenLife_CONSTANT = 7;
 const countSet_CONSTANT = 20;
+const AllChasers_CONSTANT = "0";
+const AnyoneWithLink_CONSTANT = "1";
+const Everyone_CONSTANT = "2";
+const Group_CONSTANT = "3";
 
+const genericError_CONSTANT = "Oops try again";
 const newMesssageTitle_CONSTANT = "New Message";
 const newRequestTitle_CONSTANT = "New Request";
 const newChasingTitle_CONSTANT = "Accepted Request";
@@ -32,7 +37,6 @@ var app = angular.module('App',
         'ionic-material',
         'ionMdInput',
         'toaster',
-        //'starter.controllers',
         'angular-jwt',
         'irontec.simpleChat',
         'mdChips'//,
@@ -61,7 +65,6 @@ app.run(function (AuthService, Encryption, $state, $rootScope, $ionicPlatform) {
     Encryption.fillKeyData();
     
     $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
-
         var authdata = AuthService.authentication;
 
         if ($rootScope.stateChangeBypass || toState.name === 'login' || toState.name == 'register') {
@@ -75,9 +78,8 @@ app.run(function (AuthService, Encryption, $state, $rootScope, $ionicPlatform) {
             $rootScope.stateChangeBypass = true;
             $state.go(toState, toParams);
         }
-        else {
+        else 
             $state.go('login');
-        }
     });
 });
 
@@ -291,7 +293,7 @@ function RouteMethods($stateProvider, $urlRouterProvider, $httpProvider, $ionicC
                   }
               ]
           }
-      })      
+      })
       .state('group-edit', {
           url: '/groups/edit/:groupID',
           templateUrl: 'components/groups/edit/editGroups.html',
@@ -303,14 +305,32 @@ function RouteMethods($stateProvider, $urlRouterProvider, $httpProvider, $ionicC
                           name: 'groupsAddEdit',
                           files: [
                             'components/groups/edit/editGroups.js',
+                            'components/groups/edit/editGroupsDirectives.js',
                             'components/search/searchServices.js'
                           ]
                       });
                   }
               ]
           }
+      })
+      .state('dash-group', {
+          url: '/dash/groups',
+          templateUrl: 'components/dash/groups/groups.html',
+          controller: 'DashGroupController as vm',
+          resolve: {
+              loadExternals: [
+                  '$ocLazyLoad', function ($ocLazyLoad) {
+                      return $ocLazyLoad.load({
+                          name: 'dashgroups',
+                          files: [
+                              'components/dash/groups/groups.js',
+                              'components/groups/groupServices.js'
+                          ]
+                      });
+                  }
+              ]
+          }
       });
-      
 
     $urlRouterProvider.otherwise(function ($injector) {
         var $state = $injector.get("$state");

@@ -22,7 +22,10 @@
             var msg = { "name": name, "MembersList": addlist};
             $http.post(baseURL_CONSTANT + "api/groups", msg)
             .success(function (d) {
-                groupsList.push(d);
+                if (groupsList.results.length > 0)
+                    groupsList.results.unshift(d);
+                else
+                    groupsList.results = d;
                 deffered.resolve(d);
             })
             .error(function (data, status) {
@@ -31,15 +34,14 @@
             return deffered.promise;
         };
 
-        Groups.updateGroup = function (name, groupID, deleteMembers, addMembers) {
+        Groups.updateGroup = function (name, groupID, Members) {
             var deffered = $q.defer();
-            var msg = {"name": name, "ID": groupID, "DeleteMembersList": deleteMembers, "MembersList": addMembers}
+            var msg = { "name": name, "ID": groupID, "MembersList": Members };
             $http.put(baseURL_CONSTANT + "api/groups", msg)
             .success(function (d) {
-                _.remove(groupsList, function (group) {
-                    return  group.id == d.id;
-                });
-                groupsList.push(d);
+                var group = _.find(groupsList.results, ['id', d.id]);
+                group.name = d.name;
+                group.membersAmount = d.membersAmount;
                 deffered.resolve(d);
             })
             .error(function (data, status) {
@@ -76,6 +78,11 @@
             var deffered = $q.defer();
             $http.delete(baseURL_CONSTANT + "api/groups/" + groupID)
             .success(function (d) {
+                if (d) {
+                    _.remove(groupsList.results, function (n) {
+                        return n.id === groupID;
+                    });
+                }
                 deffered.resolve(d);
             })
             .error(function (data, status) {

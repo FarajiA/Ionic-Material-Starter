@@ -250,3 +250,7 @@ width: 60%;
 .groups .group-item h2 {display:inline}
 .groups .group-item p {display:inline; font-size:12px}
  */
+
+/* Select Broadcast Groups 
+====================================== */
+.groupIntro p {font-weight:bold;}
