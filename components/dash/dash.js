@@ -4,6 +4,9 @@
         // reusable authorization
         var vm = this;
 
+        
+
+        
 
     }]);
 })();

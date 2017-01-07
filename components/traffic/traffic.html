@@ -10,7 +10,7 @@
                     <h2>no chasers homie</h2>
                 </div>
                 <ion-list ng-show="vm.Chasers.length > 0">
-                    <ion-item class="item-avatar item-icon-right" ng-repeat="chaser in vm.Chasers" type="item-text-wrap" href="#/main/activity/{{chaser.id}}">
+                    <ion-item class="item-avatar item-icon-right" ng-repeat="chaser in vm.Chasers" type="item-text-wrap" href="#/main/traffic/user/{{chaser.username}}">
                         <img ng-src="{{chaser.photo && imageURL + chaser.id + '.png' || 'img/default_avatar.png' }}">
                         <h2>{{chaser.username}}</h2>
                         <p>{{chaser.firstName}}&nbsp;{{chaser.lastName}}</p>
@@ -23,7 +23,7 @@
                     <h2>not chasing anyone</h2>
                 </div>
                 <ion-list ng-show="vm.Chasing.length > 0">
-                    <ion-item class="item-avatar item-icon-right" ng-repeat="chaser in vm.Chasing" type="item-text-wrap" href="#/main/activity/{{chaser.id}}">
+                    <ion-item class="item-avatar item-icon-right" ng-repeat="chaser in vm.Chasing" type="item-text-wrap" href="#/main/traffic/user/{{chaser.username}}">
                         <img ng-src="{{chaser.photo && imageURL + chaser.id + '.png' || 'img/default_avatar.png' }}">
                         <h2>{{chaser.username}}</h2>
                         <p>{{chaser.firstName}}&nbsp;{{chaser.lastName}}</p>

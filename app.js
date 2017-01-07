@@ -166,6 +166,33 @@ function RouteMethods($stateProvider, $urlRouterProvider, $httpProvider, $ionicC
               }]
           }
       })
+      .state('main.traffic-detail', {
+            url: '/traffic/user/:username',
+            views: {
+                'main-traffic': {
+                    templateUrl: 'components/user/user.html',
+                    controller: 'UserController as vm'
+                }
+            },
+            resolve: {
+                loadExternals: ['$ocLazyLoad', function ($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                        name: 'trafficDetails',
+                        files: [
+                            //'lib/angular-simple-logger.js',
+                            //'lib/angular-google-maps.js',
+                            'components/user/userServices.js',
+                            'components/user/user.js',
+                            'components/user/userDirectives.js',
+                            'components/blocks/blocksServices.js'
+                        ]
+                    });
+                }],
+                data: ['$ionicSideMenuDelegate', function ($ionicSideMenuDelegate) {
+                    $ionicSideMenuDelegate.canDragContent(false);
+                }]
+            }
+        })
       .state('main.activity', {
           url: '/activity/:requests',
           views: {
@@ -180,6 +207,33 @@ function RouteMethods($stateProvider, $urlRouterProvider, $httpProvider, $ionicC
                       name: 'activity',
                       files: [
                           'components/activity/activity.js'
+                      ]
+                  });
+              }],
+              data: ['$ionicSideMenuDelegate', function ($ionicSideMenuDelegate) {
+                  $ionicSideMenuDelegate.canDragContent(false);
+              }]
+          }
+      })
+      .state('main.activity-detail', {
+          url: '/activity/user/:username',
+          views: {
+              'main-activity': {
+                  templateUrl: 'components/user/user.html',
+                  controller: 'UserController as vm'
+              }
+          },
+          resolve: {
+              loadExternals: ['$ocLazyLoad', function ($ocLazyLoad) {
+                  return $ocLazyLoad.load({
+                      name: 'activityDetails',
+                      files: [
+                          //'lib/angular-simple-logger.js',
+                          //'lib/angular-google-maps.js',
+                          'components/user/userServices.js',
+                          'components/user/user.js',
+                          'components/user/userDirectives.js',
+                          'components/blocks/blocksServices.js'
                       ]
                   });
               }],
@@ -324,7 +378,8 @@ function RouteMethods($stateProvider, $urlRouterProvider, $httpProvider, $ionicC
                           name: 'dashgroups',
                           files: [
                               'components/dash/groups/groups.js',
-                              'components/groups/groupServices.js'
+                              'components/groups/groupServices.js',
+                              'components/dash/dashServices.js'
                           ]
                       });
                   }
@@ -349,7 +404,7 @@ function ocLazyLoadProvider($ocLazyLoadProvider) {
 
 /************ Factory Services **********/
 // Store and Process User data
-app.factory('AuthService', ['$http', '$q', 'localStorageService', 'jwtHelper', 'UserStore', function ($http, $q, localStorageService, jwtHelper, UserStore) {
+app.factory('AuthService', ['$http', '$q', 'localStorageService', 'UserStore', function ($http, $q, localStorageService, UserStore) {
 
     var authServiceFactory = this;
 
@@ -565,10 +620,17 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
     $scope.loadRequestState = false;
     $scope.loadChasingState = false;
 
-    $scope.activeThread = {};
-    
+    $scope.proxyCentralHub = null;
+
+    $scope.activeThread = {};    
     $scope.showTabs = {};
     $scope.showTabs.show = true;
+    
+    $scope.shareLink = "";
+    mc.showShare = $scope.shareLink.length > 0;
+    $scope.broadcast = {
+        coords : ""
+    };
     
     var authdata = AuthService.authentication;
     $scope.badge = {
@@ -597,9 +659,6 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
     mc.badgeMessageCheck = function (msgsArray) {
         if (_.isEqual($scope.badge.Messages, 1)) {
             var messages = _.some(msgsArray.results, ['viewed', false]);
-
-
-
         }
     };
 
@@ -657,7 +716,7 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
                 if ($state.current.name === 'main.traffic')
                     mc.badgeTrafficCheck();
 
-                CentralHub.initialize('centralHub');
+                $scope.proxyCentralHub = CentralHub.initialize('centralHub');
                 deffered.resolve(true);
             }, function (reason) {
                 // Error callback where reason is the value of the first rejected promise
@@ -770,6 +829,16 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
             });
     });
 
+
+    $scope.$parent.$on("centralHubBroadcast", function (e, coords) {
+        $scope.broadcast.coords = {
+            latitude: _.toNumber(coords.Latitude),
+            longitude: _.toNumber(coords.Longitude)
+        };
+
+        $scope.$broadcast('mapUpdate', { coords })
+    });
+
     mc.CheckBadge = function (badge) {
         switch (badge) {
             case 0:
@@ -795,15 +864,15 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
 
     mc.savePhrase = function () {
         if (_.isEmpty(Encryption.Key.publicKey)) {
-            Encryption.generatePrivateKey(_.trim(mc.passPhrase)).then(function (response) {
+            Encryption.generatePrivateKey(_.toLower(mc.passPhrase).replace(/\s+/g, '')).then(function (response) {
                 if (response)
                     mc.phraseModal.hide();
             });
         }
         else {
-            Encryption.verifyPassphrase(mc.passPhrase).then(function (response) {
+            Encryption.verifyPassphrase(_.toLower(mc.passPhrase).replace(/\s+/g, '')).then(function (response) {
                 if (response) {
-                    Encryption.generatePrivateKey(_.trim(mc.passPhrase)).then(function (response) {
+                    Encryption.generatePrivateKey(_.toLower(mc.passPhrase).replace(/\s+/g, '')).then(function (response) {
                         if (response)
                             mc.phraseModal.hide();
                     });

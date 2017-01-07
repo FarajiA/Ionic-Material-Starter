@@ -254,3 +254,10 @@ width: 60%;
 /* Select Broadcast Groups 
 ====================================== */
 .groupIntro p {font-weight:bold;}
+
+/* Profile  margin-top: 6px;
+======================================= */
+.profile-tabs .tab-item { color: inherit !important; }
+.profile-tabs .tab-item i { font-size: 25px; display: block; margin: 10px 0 5px; }
+
+   

@@ -28,7 +28,7 @@
     UserObject.data = function () { return data; };
     return UserObject;
 }])
-   .factory('CentralHub', ['$rootScope', 'AuthService', function ($rootScope, AuthService) {
+   .factory('CentralHub', ['$q', '$rootScope', 'AuthService', function ($q, $rootScope, AuthService) {
     var proxy = null;
 
     var initialize = function (hubName) {
@@ -57,15 +57,30 @@
             console.log('Connection closed. Retrying...');
             setTimeout(function () { connection.start({ jsonp: true }); }, 5000);
         });
+
+        return proxy;
     };
 
-    var sendRequest = function (serverMethod) {
-        this.proxy.invoke(serverMethod);
+    //var joinBroadcastGroup
+
+    var joinbroadcast = function (proxyConnection, username) {
+        var deffered = $q.defer();
+        proxyConnection.invoke('JoinBroadcastGroup', username).done(function (result) {
+            deffered.resolve(result);
+        });
+        return deffered.promise;
+    };
+
+    var streamBroadcast = function (proxyConnection) {        
+        proxyConnection.on('receiveBroadcast', function (coords) {
+            $rootScope.$emit("centralHubBroadcast", coords);
+        });
     };
 
     return {
         initialize: initialize,
-        sendRequest: sendRequest
+        joinbroadcast: joinbroadcast,
+        streamBroadcast: streamBroadcast
     };
 
    }])
@@ -173,26 +188,15 @@
          
          EncryptionObject.ActiveKeys = function () { return keys; };
          return EncryptionObject;
-     }]).factory('Broadcast', ['$http', '$q', function ($http, $q) {
-         var data = [];
-         var Broadcast = {};
+     }]).factory('ShareLink', [function () {
+         var link = [];
+         var Object = {};
 
-         Broadcast.setUser = function () {
-             var deffered = $q.defer();
-             $http.get(baseURL_CONSTANT + "api/accounts/user/")
-             .success(function (d) {
-                 data = d.result;
-                 deffered.resolve(d.result);
-             })
-             .error(function (data, status) {
-                 deffered.reject(data);
-                 console.log("Request failed " + status);
-             });
-             return deffered.promise;
+         Object.setLink = function (Link){
+             link = Link;
          };
 
-         Broadcast.data = function () { return data; };
-         return Broadcast;
+         Object.getLink = function () { return link; };
+         return Object;
      }]);
-
 })();
