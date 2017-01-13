@@ -11,8 +11,7 @@
         vm.everyone = Everyone_CONSTANT;
         vm.groupOnly = Group_CONSTANT;
         vm.coords = {longitude: "-09898723.28", latitude: "541.1488994"};
-
-
+        
         Groups.allGroups(vm.groupIndex).then(function (response) {
             vm.Groups = response.results;
             vm.groupsTotal = response.total;
@@ -23,9 +22,9 @@
             Broadcast.On(vm.coords, groupID, type).then(function (response) {               
                 $scope.shareLink = response.share;
                 ShareLink.setLink(response.share);
-                console.log(response);
                 $ionicHistory.goBack();
                 Broadcast.Notify(type, groupID);
+                CentralHub.views($scope.$parent.proxyCentralHub);
             });
 
         };

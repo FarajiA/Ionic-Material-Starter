@@ -18,6 +18,20 @@
             return deffered.promise;
         };
 
+        Broadcast.Broadcast = function (coords) {
+            var deffered = $q.defer();
+            var msg = { "Longitude": coords.longitude, "Latitude": coords.latitude };
+            $http.post(baseURL_CONSTANT + "api/broadcast", msg)
+            .success(function (d) {
+                deffered.resolve(d);
+            })
+            .error(function (data, status) {
+                deffered.reject(data);
+                console.log("Request failed " + status);
+            });
+            return deffered.promise;
+        };
+
         Broadcast.Off = function () {
             var deffered = $q.defer();
             $http.put(baseURL_CONSTANT + "api/broadcast/off")

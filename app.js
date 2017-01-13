@@ -628,9 +628,6 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
     
     $scope.shareLink = "";
     mc.showShare = $scope.shareLink.length > 0;
-    $scope.broadcast = {
-        coords : ""
-    };
     
     var authdata = AuthService.authentication;
     $scope.badge = {
@@ -830,12 +827,7 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
     });
 
 
-    $scope.$parent.$on("centralHubBroadcast", function (e, coords) {
-        $scope.broadcast.coords = {
-            latitude: _.toNumber(coords.Latitude),
-            longitude: _.toNumber(coords.Longitude)
-        };
-
+    $scope.$parent.$on("centralHubBroadcast", function (e, coords) {        
         $scope.$broadcast('mapUpdate', { coords })
     });
 

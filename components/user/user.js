@@ -4,7 +4,9 @@
         var vm = this;
         vm.username = $stateParams.username;
         vm.title = vm.username;
-        vm.broadcast = { };
+        vm.broadcast = {};
+
+        $scope.chaserBroadcast = {};
 
         var getUserRequest = function () {
             User.Info(vm.username).then(function (response) {
@@ -53,33 +55,27 @@
                 };
                 CentralHub.streamBroadcast($scope.$parent.proxyCentralHub);
             });
-            vm.mapModal.show();
+            vm.mapModal.show();            
         };
 
         vm.closeMap = function () {
             vm.mapModal.hide();
+            CentralHub.leavebroadcast($scope.$parent.proxyCentralHub, vm.id);
         };
 
         // Cleanup the modal when we're done with it!
         $scope.$on('$destroy', function () {
             vm.mapModal.remove();
-        });
-       
-        $scope.$watch('$parent.broadcast.coords', function (newValue, oldValue) {
-            if (!_.isEmpty(newValue)) {
-                vm.broadcast.coords = {
-                    latitude: _.toNumber(newValue.coords.latitude),
-                    longitude: _.toNumber(newValue.coords.longitude)
-                };
-            }
 
         });
 
         $scope.$on('mapUpdate', function (event, value) {
+            $scope.$apply(function () {
             vm.broadcast.coords = {
                 latitude: _.toNumber(value.coords.Latitude),
                 longitude: _.toNumber(value.coords.Longitude)
             };
+            });
         });
 
     }]);

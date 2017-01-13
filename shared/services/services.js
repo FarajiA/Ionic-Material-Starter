@@ -61,14 +61,26 @@
         return proxy;
     };
 
-    //var joinBroadcastGroup
-
     var joinbroadcast = function (proxyConnection, username) {
         var deffered = $q.defer();
         proxyConnection.invoke('JoinBroadcastGroup', username).done(function (result) {
             deffered.resolve(result);
         });
         return deffered.promise;
+    };
+
+    var leavebroadcast = function (proxyConnection, userID) {
+        var deffered = $q.defer();
+        proxyConnection.invoke('LeaveGroup', userID).done(function (result) {
+            deffered.resolve(result);
+        });
+        return deffered.promise;
+    };
+
+    var views = function (proxyConnection) {
+        proxyConnection.on('updateViewing', function (views) {
+            $rootScope.$emit("centralHubViewing", views);
+        });
     };
 
     var streamBroadcast = function (proxyConnection) {        
@@ -80,6 +92,8 @@
     return {
         initialize: initialize,
         joinbroadcast: joinbroadcast,
+        leavebroadcast: leavebroadcast,
+        views: views,
         streamBroadcast: streamBroadcast
     };
 
@@ -95,14 +109,14 @@
              return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
                  return String.fromCharCode('0x' + p1);
              }));
-         }
+         };
 
          //decode the base64 string
          function Base64Decode(str) {
              return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
                  return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
              }).join(''));
-         }
+         };
          
          EncryptionObject.Key = {
              privateKey: "",
