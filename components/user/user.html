@@ -11,20 +11,20 @@
         </div>
         <div class="tabs tabs-dark tabs-icon-top static profile-tabs">
             <a ui-sref="main.messages" class="tab-item">
-                <i>{{vm.chasers}}</i> Chasers
+                <i>{{chasers}}</i> Chasers
             </a>
             <a ui-sref="main.messages" class="tab-item">
-                <i>{{vm.chasing}}</i> Chasing
+                <i>{{chasing}}</i> Chasing
             </a>
-            <a ui-sref="main.messages" class="tab-item">                
-                <button class="button button-small button-stable">
-                    Do
+            <a class="tab-item">                
+                <button user-choice ng-model="relationship" class="button button-small button-stable" ng-class="{'ion-star':symbol == 0 || symbol == 1 ,'ion-paper-airplane':symbol == 2,'ion-nuclear':symbol == 3}">
+                    {{isFollowing}}
                 </button> 
             </a>
         </div>
         
         <div id="broadcast" class="row">
-            <button ng-model="broadcasting" user-broadcast data-private="{{private}}" class="button button-block icon icon-left" ng-click="vm.openMap()">Map</button>
+            <button ng-model="broadcasting" user-broadcast data-private="{{private}}" ng-class="{'broadcasting': broadcasting, 'private': private && isChasing != 1 }" class="button button-block icon icon-left" ng-click="vm.openMap()">Map</button>
         </div>
     </ion-content>
 
@@ -35,7 +35,6 @@
                 <h3>Broadcast Coords</h3>
                 {{vm.broadcast.coords.latitude}} / {{vm.broadcast.coords.longitude}}
                 <hr/>
-
             </ion-content>
         </ion-modal-view>
     </script>

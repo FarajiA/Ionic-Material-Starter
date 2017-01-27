@@ -27,6 +27,20 @@ const groupSaveButtonText_CONSTANT = "Save Changes";
 const groupEditGroup_CONSTANT = "Edit Group";
 const groupNewGroup_CONSTANT = "New Group";
 const groupMax_CONSTANT = "10 members maximum";
+const decision_CONSTANT = {
+    following: 'Chasing',
+    follow: 'Chase',
+    requested: 'Requested',
+    unblock: 'Unblock',
+    block: 'Block'
+};
+const block_CONSTANT = {
+    blockedConfirmTitle: 'Are you sure?',
+    blockedCompletedTitle: '0 has been blocked!',
+    blockedCompletedText: 'This user will no longer be able to view your profile or location.',
+    unblockConfirmTitle: 'Unblock 0?',
+    unblockOops: 'Oops! Something went wrong, try again.'
+};
 
 ionic.Gestures.gestures.Hold.defaults.hold_threshold = 20;
 
@@ -114,8 +128,7 @@ function RouteMethods($stateProvider, $urlRouterProvider, $httpProvider, $ionicC
             };
         };
         return $delegate;
-    });
-        
+    });        
 
     $stateProvider.state('main', {
         url: '/main',
@@ -611,7 +624,7 @@ app.factory('authInterceptorService', ['$q', '$rootScope', '$injector', 'localSt
     return authInterceptorServiceFactory;
 }]);
 
-app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$ionicModal', 'AuthService', 'Encryption', 'UserStore', 'Traffic', 'Activity', 'Messages', 'CentralHub', 'toaster', function ($scope, $q, $state, $stateParams, $ionicModal, AuthService, Encryption, UserStore, Traffic, Activity, Messages, CentralHub, $toaster) {
+app.controller('mainController', ['$scope', '$rootScope', '$q', '$state', '$stateParams', '$ionicModal', 'AuthService', 'Encryption', 'UserStore', 'Traffic', 'Activity', 'Messages', 'CentralHub', 'toaster', function ($scope, $rootScope, $q, $state, $stateParams, $ionicModal, AuthService, Encryption, UserStore, Traffic, Activity, Messages, CentralHub, $toaster) {
 
     var mc = this;
 
@@ -625,10 +638,10 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
     $scope.activeThread = {};    
     $scope.showTabs = {};
     $scope.showTabs.show = true;
-    
+    /*
     $scope.shareLink = "";
     mc.showShare = $scope.shareLink.length > 0;
-    
+    */
     var authdata = AuthService.authentication;
     $scope.badge = {
         Activity: "",
@@ -751,6 +764,8 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
                 state = "main.traffic";
                 if ($state.current.name != state)
                     $scope.badge.Traffic = 1;
+                else
+                    Traffic.viewed();
                 break;
             case 1:
                 Activity.requests(0);
@@ -759,6 +774,8 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
                 state = "main.activity";
                 if ($state.current.name != state)
                     $scope.badge.Activity = 1;
+                else 
+                    Activity.viewed();
                 $scope.$apply(function () {
                     $scope.loadRequestState = true;
                 });
@@ -770,6 +787,8 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
                 state = "main.traffic";
                 if ($state.current.name != state)
                     $scope.badge.Traffic = 1;
+                else
+                    Traffic.viewed();
                 $scope.$apply(function () {
                     $scope.loadChasingState = true;
                 });
@@ -789,7 +808,7 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
         }
 
         $scope.$apply(function () {
-            if ($state.current.name != "main.messages-thread") {
+            if ($state.current.name != "main.messages-thread" ) {
                 $toaster.pop('success', notify.username, title /*_.replace(text, '{0}', notify.username)*/, "", 'trustedHtml', function (toaster) {
                     $state.go(state);
                     return true;
@@ -828,7 +847,7 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
 
 
     $scope.$parent.$on("centralHubBroadcast", function (e, coords) {        
-        $scope.$broadcast('mapUpdate', { coords })
+        $scope.$broadcast('mapUpdate', coords)
     });
 
     mc.CheckBadge = function (badge) {
@@ -875,6 +894,18 @@ app.controller('mainController', ['$scope', '$q', '$state', '$stateParams', '$io
             });
         }
     };
+
+
+    $rootScope.$on('emit_Action', function (event, args) {
+        switch (args.action) {
+            case "chasers":
+                Traffic.chasers(0);
+                break;
+            case "chasing":
+                Traffic.chasing(0);
+                break;
+        }
+    });
 
 }]);
 

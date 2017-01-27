@@ -12,34 +12,19 @@
             User.Info(vm.username).then(function (response) {
                 vm.fullName = response.fullName;
                 vm.id = response.id;
-                vm.isChasing = response.isChasing;
                 vm.photo = response.photo;
                 vm.private = response.private;
                 vm.publicKey = response.publicKey;
-                vm.chasing = response.chasing;
-                vm.chasers = response.chasers;
-                vm.broadcasting = response.broadcast;
-                /*
-                Block.blockExists(vm.id).then(function (response) {
-
-                 
-                    UserObject.setBlocked(response.ID > 0);
-                    if (response.ID > 0) {
-                        $scope.isChasing = $scope.symbol = 3;
-                        $scope.blockText = activityConst.unblock;
-                    }
-                    else {
-                        $scope.isChasing = $scope.symbol = UserObject.details().isChasing;
-                        $scope.blockText = activityConst.block;
-                    }
-                  
-                });  
-                */
+                $scope.chasing = response.chasing;
+                $scope.chasers = response.chasers;
+                vm.broadcasting = response.broadcasting;
+                $scope.relationship = response.relationship;                
             });
         };
 
         getUserRequest();
         
+        /*  Map logic */
         $ionicModal.fromTemplateUrl('mapModal.html', {
             scope: $scope,
             animation: 'slide-in-up'
@@ -63,7 +48,6 @@
             CentralHub.leavebroadcast($scope.$parent.proxyCentralHub, vm.id);
         };
 
-        // Cleanup the modal when we're done with it!
         $scope.$on('$destroy', function () {
             vm.mapModal.remove();
 
@@ -77,6 +61,32 @@
             };
             });
         });
+        /* End map*/
+
+        $scope.$on('$ionicView.enter', function () {
+            if (!(vm.id === UserStore.data().id)) {
+                //$scope.chaserLink = '#/main/' + $scope.segment + '/chasers/' + $scope.GUID;
+                //$scope.chasingLink = '#/main/' + $scope.segment + '/chasing/' + $scope.GUID;
+
+                $scope.$watch("broadcasting", function (newValue, oldValue) {
+                    if (newValue) {
+
+                    }
+
+                });
+            }
+        });
+
+        $scope.$on('$ionicView.leave', function () {
+            if (!$scope.selfIdentity) {
+                clearGeoWatch();
+                UserView.SetUserPageCurrent(false);
+            }
+        });
+
+
+
+
 
     }]);
 })();
